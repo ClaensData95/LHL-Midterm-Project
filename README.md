@@ -2,7 +2,7 @@
 
 ## Project/Goals
 
-- roman goals
+- roman goals updated
 
 ## Process
 ### (your step 1)
