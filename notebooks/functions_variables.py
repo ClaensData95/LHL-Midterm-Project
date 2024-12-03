@@ -46,3 +46,35 @@ def ohe_column(df, column):
 
     # One-hot encode the exploded items
     return pd.get_dummies(exploded_df, columns=[column])
+
+
+def reorder_columns(df):
+    """
+    Reorder columns in a DataFrame according to a predefined order.
+    
+    Parameters:
+    - df: pandas.DataFrame, the input DataFrame.
+    
+    Returns:
+    - pandas.DataFrame: A new DataFrame with columns reordered.
+    """
+    # Define the desired column order
+    column_order = [
+        "property_id", "location_address_state", "state_frequency", "location_address_city", "city_frequency",
+        "year_listed", "year_sold", "description_sold_price", "price_reduced_amount",
+        "days_on_market", "description_year_built", "description_stories", "description_sqft",
+        "description_baths", "description_beds", "description_garage", "description_lot_sqft",
+        "central_air", "community_outdoor_space", "basement", "fireplace", "hardwood_floors",
+        "recreation_facilities", "community_security_features", "view", "central_heat",
+        "city_view", "fenced_yard"
+    ]
+    
+    # Ensure all columns in the desired order are present
+    missing_cols = set(column_order) - set(df.columns)
+    for col in missing_cols:
+        df[col] = None  # Add missing columns with NaN values
+
+    # Reorder the DataFrame columns
+    reordered_df = df.reindex(columns=column_order)
+    
+    return reordered_df
