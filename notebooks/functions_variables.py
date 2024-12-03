@@ -2,7 +2,7 @@ import json
 import pandas as pd
 
 
-def encode_tags(df):
+def encode_tags(df, top_n=10):
     """Use this function to manually encode tags from each sale.
     You could also provide another argument to filter out low
     counts of tags to keep cardinality to a minimum.
@@ -13,9 +13,17 @@ def encode_tags(df):
     Returns:
         pandas.DataFrame: modified with encoded tags
     """
-    tags = df["tags"].tolist()
-    # create a unique list of tags and then create a new column for each tag
-
+    # Count the frequency of each tag
+    counts = df['tags'].explode().value_counts()
+    # Keep top_n tags
+    keep = counts.index[:top_n].tolist()
+    # Filter tags column
+    df['tags'] = df['tags'].apply(
+        lambda x: [t for t in x if t in keep] if isinstance(x, list) else x
+    )
+    exploded_df = df['tags'].explode('tags')
+    dummies = pd.get_dummies(exploded_df, columns=['tags'], prefix='tag')
+    df = pd.concat([dummies, df], axis=1)
     return df
 
 
@@ -48,6 +56,25 @@ def ohe_column(df, column):
     return pd.get_dummies(exploded_df, columns=[column])
 
 
+<<<<<<< HEAD
+=======
+# create a function that takes the columns description_sold_date and list_date and returns two new columns: year_sold and year_listed
+def year_sold_listed(df):
+    """
+    Function that takes the columns description_sold_date and list_date and returns two new columns: year_sold and year_listed
+
+    Args:
+        df:
+
+    Returns: DataFrame
+
+    """
+    df['year_sold'] = df['description_sold_date'].dt.year
+    df['year_listed'] = df['list_date'].dt.year
+    return df
+
+
+>>>>>>> main
 def reorder_columns(df):
     """
     Reorder columns in a DataFrame according to a predefined order.
