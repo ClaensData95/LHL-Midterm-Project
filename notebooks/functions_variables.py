@@ -54,3 +54,19 @@ def ohe_column(df, column):
 
     # One-hot encode the exploded items
     return pd.get_dummies(exploded_df, columns=[column])
+
+
+# create a function that takes the columns description_sold_date and list_date and returns two new columns: year_sold and year_listed
+def year_sold_listed(df):
+    """
+    Function that takes the columns description_sold_date and list_date and returns two new columns: year_sold and year_listed
+
+    Args:
+        df:
+
+    Returns: DataFrame
+
+    """
+    df['year_sold'] = df['description_sold_date'].dt.year
+    df['year_listed'] = df['list_date'].dt.year
+    return df
