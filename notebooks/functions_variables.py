@@ -118,23 +118,32 @@ def scale_columns_train_test(train_df, test_df, columns_to_scale):
     
 
 
+def scale_target_train_test(y_train, y_test):
+
+    # Convert y_train and y_test to DataFrame if they are Series
+    if isinstance(y_train, pd.Series):
+        y_train = y_train.to_frame(name='target')
+    if isinstance(y_test, pd.Series):
+        y_test = y_test.to_frame(name='target')
+
+    # Check for empty datasets
+    if y_train.empty or y_test.empty:
+        raise ValueError("y_train or y_test is empty. Check your data splitting or preprocessing steps.")
+
+    # Initialize the scaler
+    scaler = StandardScaler()
+
+    # Fit the scaler on y_train and transform both y_train and y_test
+    y_train_scaled = pd.DataFrame(scaler.fit_transform(y_train), columns=['target'], index=y_train.index)
+    y_test_scaled = pd.DataFrame(scaler.transform(y_test), columns=['target'], index=y_test.index)
+
+    return y_train_scaled, y_test_scaled, scaler
+
+
 
 
 def evaluate_model(model, X_train, X_test, y_train, y_test, scaler_target):
-    """
-    Train the model, make predictions, evaluate performance, and inverse transform predictions and targets.
-
-    Parameters:
-    - model: The regression model to train and evaluate.
-    - X_train: Training feature data.
-    - X_test: Testing feature data.
-    - y_train: Scaled training target data.
-    - y_test: Scaled testing target data.
-    - scaler_target: Fitted scaler used for inverse transforming the target variable.
-
-    Returns:
-    - A dictionary with RMSE, MAE, and R^2 for train and test sets.
-    """
+  
     # Train the model
     model.fit(X_train, y_train.ravel())  # Flatten the scaled target for training
     
