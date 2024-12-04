@@ -133,6 +133,15 @@ def scale_target_train_test(y_train, y_test):
     # Initialize the scaler
     scaler = StandardScaler()
 
+    # Fit the scaler on y_train and transform both y_train and y_test
+    y_train_scaled = pd.DataFrame(scaler.fit_transform(y_train), columns=['target'], index=y_train.index)
+    y_test_scaled = pd.DataFrame(scaler.transform(y_test), columns=['target'], index=y_test.index)
+
+    return y_train_scaled, y_test_scaled, scaler
+
+
+
+
 def evaluate_model(model, X_train, X_test, y_train, y_test, scaler_target):
   
     # Train the model
