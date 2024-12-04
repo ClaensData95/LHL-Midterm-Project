@@ -1,18 +1,11 @@
 import json
 import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 
 def encode_tags(df, top_n=10):
-    """Use this function to manually encode tags from each sale.
-    You could also provide another argument to filter out low
-    counts of tags to keep cardinality to a minimum.
 
-    Args:
-        pandas.DataFrame
-
-    Returns:
-        pandas.DataFrame: modified with encoded tags
-    """
     # Count the frequency of each tag
     counts = df['tags'].explode().value_counts()
     # Keep top_n tags
@@ -56,33 +49,64 @@ def ohe_column(df, column):
     return pd.get_dummies(exploded_df, columns=[column])
 
 
-def reorder_columns(df):
-    """
-    Reorder columns in a DataFrame according to a predefined order.
-    
-    Parameters:
-    - df: pandas.DataFrame, the input DataFrame.
-    
-    Returns:
-    - pandas.DataFrame: A new DataFrame with columns reordered.
-    """
+def reorder_columns_train_test(train_df, test_df):
+  
     # Define the desired column order
     column_order = [
-        "property_id", "location_address_state", "state_frequency", "location_address_city", "city_frequency",
-        "year_listed", "year_sold", "description_sold_price", "price_reduced_amount",
-        "days_on_market", "description_year_built", "description_stories", "description_sqft",
-        "description_baths", "description_beds", "description_garage", "description_lot_sqft",
-        "central_air", "community_outdoor_space", "basement", "fireplace", "hardwood_floors",
-        "recreation_facilities", "community_security_features", "view", "central_heat",
-        "city_view", "fenced_yard"
+        'year_listed', 'year_sold', 'days_on_market', 'city_frequency', 'state_frequency',
+        'description_year_built', 'description_stories', 'description_baths',
+        'description_beds', 'description_garage', 'description_sqft', 'central_air',
+        'community_outdoor_space', 'basement', 'fireplace', 'hardwood_floors',
+        'recreation_facilities', 'community_security_features', 'view', 'central_heat',
+        'city_view', 'fenced_yard'
     ]
     
-    # Ensure all columns in the desired order are present
-    missing_cols = set(column_order) - set(df.columns)
-    for col in missing_cols:
-        df[col] = None  # Add missing columns with NaN values
-
-    # Reorder the DataFrame columns
-    reordered_df = df.reindex(columns=column_order)
+    # Reorder the DataFrame columns for both train and test sets
+    train_df = train_df.reindex(columns=column_order)
+    test_df = test_df.reindex(columns=column_order)
     
-    return reordered_df
+    return train_df, test_df
+
+def year_sold_listed(df):
+    df['year_sold'] = df['description_sold_date'].dt.year
+    df['year_listed'] = df['list_date'].dt.year
+    return df
+
+
+def fill_na_with_distribution_train_test(train_df, test_df, column):
+  
+    # Get non-NaN values from the training set
+    non_nan_values = train_df[column].dropna()
+
+    # Fill NaN values in the training set by sampling from its own distribution
+    train_fill_values = np.random.choice(non_nan_values, size=train_df[column].isna().sum(), replace=True)
+    train_df.loc[train_df[column].isna(), column] = train_fill_values
+
+    # Fill NaN values in the testing set using the training distribution
+    test_fill_values = np.random.choice(non_nan_values, size=test_df[column].isna().sum(), replace=True)
+    test_df.loc[test_df[column].isna(), column] = test_fill_values
+
+    return train_df, test_df
+
+def fill_na_with_median_train_test(train_df, test_df, column):
+
+    # Calculate the median from the training set
+    median_value = train_df[column].median()
+
+    # Fill NaN values in the column for both training and testing sets
+    train_df[column] = train_df[column].fillna(median_value)
+    test_df[column] = test_df[column].fillna(median_value)
+
+    return train_df, test_df
+
+
+def scale_columns_train_test(train_df, test_df, columns):
+
+    # Initialize the scaler
+    scaler = StandardScaler()
+    
+    # Fit the scaler on the training data and transform both train and test sets
+    train_df[columns] = scaler.fit_transform(train_df[columns])
+    test_df[columns] = scaler.transform(test_df[columns])
+    
+    return train_df, test_df
