@@ -1,3 +1,7 @@
 .idea
 notebooks/__pycache__/
 notebooks/project.ipynb
+~$Data-Science-Mdterm-Project.pptx
+data/generated
+data/X_test.csv
+data/X_train.csv
