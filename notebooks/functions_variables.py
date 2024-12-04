@@ -5,16 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 def encode_tags(df, top_n=10):
-    """Use this function to manually encode tags from each sale.
-    You could also provide another argument to filter out low
-    counts of tags to keep cardinality to a minimum.
 
-    Args:
-        pandas.DataFrame
-
-    Returns:
-        pandas.DataFrame: modified with encoded tags
-    """
     # Count the frequency of each tag
     counts = df['tags'].explode().value_counts()
     # Keep top_n tags
@@ -59,16 +50,7 @@ def ohe_column(df, column):
 
 
 def reorder_columns_train_test(train_df, test_df):
-    """
-    Reorder columns in both training and testing DataFrames according to a predefined order.
-    
-    Parameters:
-    - train_df: pandas.DataFrame, the training DataFrame.
-    - test_df: pandas.DataFrame, the testing DataFrame.
-    
-    Returns:
-    - train_df, test_df: DataFrames with columns reordered.
-    """
+  
     # Define the desired column order
     column_order = [
         'year_listed', 'year_sold', 'days_on_market', 'city_frequency', 'state_frequency',
@@ -92,17 +74,7 @@ def year_sold_listed(df):
 
 
 def fill_na_with_distribution_train_test(train_df, test_df, column):
-    """
-    Fills NaN values in a column by sampling from the non-NaN values in the training set.
-    
-    Parameters:
-    - train_df: pandas.DataFrame, the training DataFrame.
-    - test_df: pandas.DataFrame, the testing DataFrame.
-    - column: str, the name of the column to fill.
-    
-    Returns:
-    - train_df, test_df: DataFrames with NaN values filled in the specified column.
-    """
+  
     # Get non-NaN values from the training set
     non_nan_values = train_df[column].dropna()
 
@@ -117,17 +89,7 @@ def fill_na_with_distribution_train_test(train_df, test_df, column):
     return train_df, test_df
 
 def fill_na_with_median_train_test(train_df, test_df, column):
-    """
-    Fills NaN values in a column using the median calculated from the training set.
-    
-    Parameters:
-    - train_df: pandas.DataFrame, the training DataFrame.
-    - test_df: pandas.DataFrame, the testing DataFrame.
-    - column: str, the name of the column to fill.
-    
-    Returns:
-    - train_df, test_df: DataFrames with NaN values filled in the specified column.
-    """
+
     # Calculate the median from the training set
     median_value = train_df[column].median()
 
@@ -139,17 +101,7 @@ def fill_na_with_median_train_test(train_df, test_df, column):
 
 
 def scale_columns_train_test(train_df, test_df, columns):
-    """
-    Scales specified columns in the training and testing DataFrames using StandardScaler.
-    
-    Parameters:
-    - train_df: pandas.DataFrame, the training DataFrame.
-    - test_df: pandas.DataFrame, the testing DataFrame.
-    - columns: list of str, the column names to scale.
-    
-    Returns:
-    - train_df, test_df: DataFrames with the specified columns scaled.
-    """
+
     # Initialize the scaler
     scaler = StandardScaler()
     
