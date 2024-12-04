@@ -1,3 +1,6 @@
 .idea
 notebooks/__pycache__/
 notebooks/project.ipynb
+data/X_test.csv
+data/X_train.csv
+data/generated/
