@@ -1,13 +1,9 @@
 .idea
 notebooks/__pycache__/
 notebooks/project.ipynb
-<<<<<<< HEAD
 data/X_test.csv
 data/X_train.csv
 data/generated/
-=======
 ~$Data-Science-Mdterm-Project.pptx
 data/generated
-data/X_test.csv
-data/X_train.csv
->>>>>>> 950ace8b15d479d341a3b8f298248e7ccf7a5eed
+data/processed/
