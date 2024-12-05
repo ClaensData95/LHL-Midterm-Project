@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
@@ -118,65 +118,29 @@ def scale_columns_train_test(train_df, test_df, columns_to_scale):
     
 
 
-def scale_target_train_test(y_train, y_test):
+#def scale_target_train_test(y_train, y_test):
 
     # Convert y_train and y_test to DataFrame if they are Series
-    if isinstance(y_train, pd.Series):
-        y_train = y_train.to_frame(name='target')
-    if isinstance(y_test, pd.Series):
-        y_test = y_test.to_frame(name='target')
+ #   if isinstance(y_train, pd.Series):
+  #      y_train = y_train.to_frame(name='target')
+   # if isinstance(y_test, pd.Series):
+    #    y_test = y_test.to_frame(name='target')
 
     # Check for empty datasets
-    if y_train.empty or y_test.empty:
-        raise ValueError("y_train or y_test is empty. Check your data splitting or preprocessing steps.")
+    #if y_train.empty or y_test.empty:
+ #      raise ValueError("y_train or y_test is empty. Check your data splitting or preprocessing steps.")
 
-    # Initialize the scaler
-    scaler = StandardScaler()
+  #  # Initialize the scaler
+   # scaler = StandardScaler()
 
     # Fit the scaler on y_train and transform both y_train and y_test
-    y_train_scaled = pd.DataFrame(scaler.fit_transform(y_train), columns=['target'], index=y_train.index)
-    y_test_scaled = pd.DataFrame(scaler.transform(y_test), columns=['target'], index=y_test.index)
+    #y_train_scaled = pd.DataFrame(scaler.fit_transform(y_train), columns=['target'], index=y_train.index)
+    #y_test_scaled = pd.DataFrame(scaler.transform(y_test), columns=['target'], index=y_test.index)
 
-    return y_train_scaled, y_test_scaled, scaler
-
-
+    #return y_train_scaled, y_test_scaled, scaler
 
 
-def evaluate_model(model, X_train, X_test, y_train, y_test, scaler_target):
-  
-    # Train the model
-    model.fit(X_train, y_train.ravel())  # Flatten the scaled target for training
-    
-    # Predict (scaled values)
-    y_train_pred_scaled = model.predict(X_train).reshape(-1, 1)
-    y_test_pred_scaled = model.predict(X_test).reshape(-1, 1)
-    
-    # Inverse transform predictions and actual values
-    y_train_pred = scaler_target.inverse_transform(y_train_pred_scaled)
-    y_test_pred = scaler_target.inverse_transform(y_test_pred_scaled)
-    y_train_original = scaler_target.inverse_transform(y_train.reshape(-1, 1))
-    y_test_original = scaler_target.inverse_transform(y_test.reshape(-1, 1))
 
-    # Calculate metrics
-    train_rmse = mean_squared_error(y_train_original, y_train_pred, squared=False)
-    test_rmse = mean_squared_error(y_test_original, y_test_pred, squared=False)
-    train_mae = mean_absolute_error(y_train_original, y_train_pred)
-    test_mae = mean_absolute_error(y_test_original, y_test_pred)
-    train_r2 = r2_score(y_train_original, y_train_pred)
-    test_r2 = r2_score(y_test_original, y_test_pred)
 
-    # Print metrics
-    print(f"{model.__class__.__name__}:")
-    print(f"  Train RMSE: ${train_rmse:.2f}, Test RMSE: ${test_rmse:.2f}")
-    print(f"  Train MAE: ${train_mae:.2f}, Test MAE: ${test_mae:.2f}")
-    print(f"  Train R^2: {train_r2:.2f}, Test R^2: {test_r2:.2f}")
 
-    # Return metrics as a dictionary
-    return {
-        "Train RMSE": train_rmse,
-        "Test RMSE": test_rmse,
-        "Train MAE": train_mae,
-        "Test MAE": test_mae,
-        "Train R^2": train_r2,
-        "Test R^2": test_r2
-    }
+
