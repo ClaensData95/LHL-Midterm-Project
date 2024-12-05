@@ -140,7 +140,50 @@ def scale_columns_train_test(train_df, test_df, columns_to_scale):
     #return y_train_scaled, y_test_scaled, scaler
 
 
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
+# Function for evaluation
+def evaluate_model(model, X_train, X_test, y_train_scaled, y_test_scaled, scaler_target):
+ 
+    # Train the model
+    model.fit(X_train, y_train_scaled)
+    
+    # Predict (scaled values)
+    y_train_pred_scaled = model.predict(X_train).reshape(-1, 1)
+    y_test_pred_scaled = model.predict(X_test).reshape(-1, 1)
 
+    # Inverse transform predictions and targets
+    y_train_pred = scaler_target.inverse_transform(y_train_pred_scaled).flatten()
+    y_test_pred = scaler_target.inverse_transform(y_test_pred_scaled).flatten()
+    y_train_original = scaler_target.inverse_transform(y_train_scaled.reshape(-1, 1)).flatten()
+    y_test_original = scaler_target.inverse_transform(y_test_scaled.reshape(-1, 1)).flatten()
+
+    # Calculate metrics on original scale
+    train_rmse = root_mean_squared_error(y_train_original, y_train_pred)
+    test_rmse = root_mean_squared_error(y_test_original, y_test_pred)
+    train_mae = mean_absolute_error(y_train_original, y_train_pred)
+    test_mae = mean_absolute_error(y_test_original, y_test_pred)
+    train_r2 = r2_score(y_train_original, y_train_pred)
+    test_r2 = r2_score(y_test_original, y_test_pred)
+
+    # Print metrics
+    print(f"{model.__class__.__name__}:")
+    print(f"  Train RMSE: ${train_rmse:.2f}, Test RMSE: ${test_rmse:.2f}")
+    print(f"  Train MAE: ${train_mae:.2f}, Test MAE: ${test_mae:.2f}")
+    print(f"  Train R^2: {train_r2:.2f}, Test R^2: {test_r2:.2f}")
+
+    # Return metrics
+    return {
+        "Train RMSE": train_rmse,
+        "Test RMSE": test_rmse,
+        "Train MAE": train_mae,
+        "Test MAE": test_mae,
+        "Train R^2": train_r2,
+        "Test R^2": test_r2
+    }
 
 
