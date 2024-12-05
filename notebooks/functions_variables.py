@@ -99,28 +99,21 @@ def fill_na_with_median_train_test(train_df, test_df, column):
     return train_df, test_df
 
 
-def scale_columns_train_test(train_df, test_df, columns):
-    # Initialize the scaler
-    scaler = StandardScaler()
-    # Fit and transform the specified columns
-    train_df[columns] = scaler.fit_transform(train_df[columns])
-    test_df[columns] = scaler.transform(test_df[columns])
-    # Return the scaled DataFrames and the scaler
-    return train_df, test_df, scaler
+def evaluate_model(model, X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled, scaler_target):
 
-
-# Function for evaluation
-def evaluate_model(model, data, data_scaled, scaler_target):
     # Train the model
-    model.fit(data['X_train'], data_scaled['y_train'])
-    # Predict (scaled values)
-    y_train_pred_scaled = model.predict(data['X_train']).reshape(-1, 1)
-    y_test_pred_scaled = model.predict(data['X_test']).reshape(-1, 1)
+    model.fit(X_train_scaled, y_train_scaled)
+
+    # Predict (scaled)
+    y_train_pred_scaled = model.predict(X_train_scaled).reshape(-1, 1)
+    y_test_pred_scaled = model.predict(X_test_scaled).reshape(-1, 1)
+
     # Inverse transform predictions and targets
     y_train_pred = scaler_target.inverse_transform(y_train_pred_scaled).flatten()
     y_test_pred = scaler_target.inverse_transform(y_test_pred_scaled).flatten()
-    y_train_original = scaler_target.inverse_transform(data_scaled['y_train'].reshape(-1, 1)).flatten()
-    y_test_original = scaler_target.inverse_transform(data_scaled['y_test'].reshape(-1, 1)).flatten()
+    y_train_original = scaler_target.inverse_transform(y_train_scaled.reshape(-1, 1)).flatten()
+    y_test_original = scaler_target.inverse_transform(y_test_scaled.reshape(-1, 1)).flatten()
+
     # Calculate metrics on original scale
     train_rmse = root_mean_squared_error(y_train_original, y_train_pred)
     test_rmse = root_mean_squared_error(y_test_original, y_test_pred)
@@ -128,19 +121,21 @@ def evaluate_model(model, data, data_scaled, scaler_target):
     test_mae = mean_absolute_error(y_test_original, y_test_pred)
     train_r2 = r2_score(y_train_original, y_train_pred)
     test_r2 = r2_score(y_test_original, y_test_pred)
+
     # Print metrics
-    print(f'{model.__class__.__name__}:')
-    print(f'  Train RMSE: ${train_rmse:.2f}, Test RMSE: ${test_rmse:.2f}')
-    print(f'  Train MAE: ${train_mae:.2f}, Test MAE: ${test_mae:.2f}')
-    print(f'  Train R^2: {train_r2:.2f}, Test R^2: {test_r2:.2f}')
+    print(f"{model.__class__.__name__}:")
+    print(f"  Train RMSE: ${train_rmse:.2f}, Test RMSE: ${test_rmse:.2f}")
+    print(f"  Train MAE: ${train_mae:.2f}, Test MAE: ${test_mae:.2f}")
+    print(f"  Train R^2: {train_r2:.2f}, Test R^2: {test_r2:.2f}")
+
     # Return metrics
     return {
-        'Train RMSE': train_rmse,
-        'Test RMSE': test_rmse,
-        'Train MAE': train_mae,
-        'Test MAE': test_mae,
-        'Train R^2': train_r2,
-        'Test R^2': test_r2
+        "Train RMSE": train_rmse,
+        "Test RMSE": test_rmse,
+        "Train MAE": train_mae,
+        "Test MAE": test_mae,
+        "Train R^2": train_r2,
+        "Test R^2": test_r2
     }
 
 # def scale_target_train_test(y_train, y_test):
