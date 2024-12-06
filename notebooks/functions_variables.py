@@ -1,8 +1,31 @@
+import os
+import sys
 import json
-import pandas as pd
+import joblib
+import logging
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
+from collections import Counter
+import seaborn as sns
+from sklearn.svm import SVR
+import matplotlib.pyplot as plt
+from xgboost import XGBRegressor
+from functions_variables import *
+from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.ensemble import StackingRegressor
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.preprocessing import StandardScaler
+
+
 
 
 def encode_tags(df, top_n=10):
@@ -52,21 +75,13 @@ def ohe_column(df, column):
     return pd.get_dummies(exploded_df, columns=[column])
 
 
-def reorder_columns_train_test(train_df, test_df):
-    # Define the desired column order
-    column_order = [
-        'year_listed', 'year_sold', 'days_on_market', 'city_frequency', 'state_frequency',
-        'description_year_built', 'description_stories', 'description_baths',
-        'description_beds', 'description_garage', 'description_sqft', 'central_air',
-        'community_outdoor_space', 'basement', 'fireplace', 'hardwood_floors',
-        'recreation_facilities', 'community_security_features', 'view', 'central_heat',
-        'city_view', 'fenced_yard'
-    ]
-    # Reorder the DataFrame columns for both train and test sets
-    train_df = train_df.reindex(columns=column_order)
-    test_df = test_df.reindex(columns=column_order)
-    # Return the reordered DataFrames
-    return train_df, test_df
+def reorder_columns_num_cat(df):
+    # Get numerical columns
+    num_cols = df.select_dtypes(include=np.number)
+    # Get not numerical columns
+    other_cols = df.select_dtypes(exclude=np.number)
+    df = pd.concat([num_cols, other_cols], axis=1)
+    return df
 
 
 def year_sold_listed(df):
@@ -138,23 +153,25 @@ def evaluate_model(model, X_train_scaled, X_test_scaled, y_train_scaled, y_test_
         "Test R^2": test_r2
     }
 
-# def scale_target_train_test(y_train, y_test):
 
-# Convert y_train and y_test to DataFrame if they are Series
-#   if isinstance(y_train, pd.Series):
-#      y_train = y_train.to_frame(name='target')
-# if isinstance(y_test, pd.Series):
-#    y_test = y_test.to_frame(name='target')
 
-# Check for empty datasets
-# if y_train.empty or y_test.empty:
-#      raise ValueError('y_train or y_test is empty. Check your data splitting or preprocessing steps.')
-
-#  # Initialize the scaler
-# scaler = StandardScaler()
-
-# Fit the scaler on y_train and transform both y_train and y_test
-# y_train_scaled = pd.DataFrame(scaler.fit_transform(y_train), columns=['target'], index=y_train.index)
-# y_test_scaled = pd.DataFrame(scaler.transform(y_test), columns=['target'], index=y_test.index)
-
-# return y_train_scaled, y_test_scaled, scaler
+def perform_cross_validation(models, X, y, cv=5, scoring='neg_root_mean_squared_error'):
+ 
+    results = {}
+    for model_name, model in models.items():
+        print(f"Performing cross-validation for {model_name}...")
+        cv_scores = cross_val_score(
+            estimator=model,
+            X=X,
+            y=y,
+            scoring=scoring,
+            cv=cv,
+            n_jobs=-1  # Use all available cores for faster computation
+        )
+        rmse_scores = -cv_scores  # Convert negative RMSE to positive
+        results[model_name] = {
+            'Per-Fold RMSE': rmse_scores,
+            'Mean RMSE': rmse_scores.mean()
+        }
+        print(f"{model_name} Mean RMSE: {rmse_scores.mean():.2f}")
+    return results
