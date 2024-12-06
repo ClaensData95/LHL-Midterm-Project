@@ -102,9 +102,9 @@ We evaluated the following models and compared their performance:
 ## **Final Model**
 The **Stacking Regressor** combining **Random Forest** and **XGBoost** was the best-performing model. It achieved:
 
-- **Test RMSE**: $21,748.69
-- **Test MAE**: $4,434.43
-- **Test \(R^2\)**: 1.00
+- **Test RMSE**: $24254.97
+- **Test MAE**: $4858.01
+- **Test \(R^2\)**: 0.99
 
 This model demonstrated excellent performance, with minimal error and perfect generalization to unseen data.
 
