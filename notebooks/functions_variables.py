@@ -24,7 +24,8 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.ensemble import StackingRegressor
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.base import BaseEstimator, TransformerMixin
+from joblib import load
 
 
 
@@ -175,3 +176,34 @@ def perform_cross_validation(models, X, y, cv=5, scoring='neg_root_mean_squared_
         }
         print(f"{model_name} Mean RMSE: {rmse_scores.mean():.2f}")
     return results
+
+# Custom Transformer for Feature Selection
+class FeatureSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, features):
+        self.features = features
+    
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        return X[self.features]
+
+# Custom Transformer for JSON to DataFrame conversion
+class JSONLoader(BaseEstimator, TransformerMixin):
+    def __init__(self, feature_columns):
+        self.feature_columns = feature_columns
+    
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, json_file_path):
+        with open(json_file_path, 'r') as file:
+            data = json.load(file)
+        
+        # Flatten the JSON and convert to DataFrame
+        results = data.get('data', {}).get('results', [])
+        df = pd.json_normalize(results)
+        
+        # Select only the necessary columns
+        df = df[self.feature_columns]
+        return df
